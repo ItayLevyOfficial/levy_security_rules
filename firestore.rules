@@ -1,9 +1,14 @@
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
+      function validName(name) {
+        return name is string &&
+          name.size() > 0 &&
+          name.size() < 40;
+      } 
       allow create: if request.auth.uid == userId &&
        request.resource.data.phoneNumber == request.auth.token.phone_number &&
-       request.resource.data.firstName is string;
+       validName(request.resource.data.firstName)
     }
   }
 }
