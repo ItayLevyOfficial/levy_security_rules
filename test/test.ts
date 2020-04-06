@@ -44,7 +44,7 @@ after(async () => {
 @suite
 class Levy {
 	@test
-	async "create a legal user document"() {
+	async "create legal user document"() {
 		const username = "itaylevy134";
 		const phoneNumber = '+972544677';
 		const db = authedApp({uid: username, phone_number: phoneNumber});
@@ -52,6 +52,49 @@ class Levy {
 		await firebase.assertSucceeds(userProfile.set(
 			{
 				phoneNumber: phoneNumber,
+				firstName: 'Itay',
+				lastName: 'Levy'
+			}
+		));
+	}
+	
+	@test
+	async "create illegal user document (without first name)"() {
+		const username = "itaylevy134";
+		const phoneNumber = '+972544677';
+		const db = authedApp({uid: username, phone_number: phoneNumber});
+		const userProfile = db.collection("users").doc(username);
+		await firebase.assertFails(userProfile.set(
+			{
+				phoneNumber: phoneNumber,
+				lastName: 'Levy'
+			}
+		));
+	}
+	
+	@test
+	async "create illegal user document (without last name)"() {
+		const username = "itaylevy134";
+		const phoneNumber = '+972544677';
+		const db = authedApp({uid: username, phone_number: phoneNumber});
+		const userProfile = db.collection("users").doc(username);
+		await firebase.assertFails(userProfile.set(
+			{
+				phoneNumber: phoneNumber,
+				firstName: 'Itay'
+			}
+		));
+	}
+	
+	@test
+	async "create illegal user document (wrong phone number)"() {
+		const username = "itaylevy134";
+		const phoneNumber = '+972544677';
+		const db = authedApp({uid: username, phone_number: phoneNumber});
+		const userProfile = db.collection("users").doc(username);
+		await firebase.assertFails(userProfile.set(
+			{
+				phoneNumber: '12345',
 				firstName: 'Itay',
 				lastName: 'Levy'
 			}

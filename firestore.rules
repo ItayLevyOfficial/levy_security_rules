@@ -6,9 +6,12 @@ service cloud.firestore {
           name.size() > 0 &&
           name.size() < 40;
       } 
-      allow create: if request.auth.uid == userId &&
+      allow create, update: if request.auth.uid == userId &&
        request.resource.data.phoneNumber == request.auth.token.phone_number &&
-       validName(request.resource.data.firstName)
+       validName(request.resource.data.firstName) &&
+       validName(request.resource.data.lastName);
+      allow delete: if request.auth.uid == userId;
+      allow read: if request.auth.uid == userId;
     }
   }
 }
