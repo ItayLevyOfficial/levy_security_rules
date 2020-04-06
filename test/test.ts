@@ -19,9 +19,7 @@ const rules = fs.readFileSync("firestore.rules", "utf8");
  * @return {object} the app.
  */
 function authedApp(auth) {
-  return firebase
-    .initializeTestApp({ projectId, auth })
-    .firestore();
+	return firebase.initializeTestApp({projectId, auth}).firestore();
 }
 
 /*
@@ -30,25 +28,33 @@ function authedApp(auth) {
  * ============
  */
 before(async () => {
-  await firebase.loadFirestoreRules({ projectId, rules });
+	await firebase.loadFirestoreRules({projectId, rules});
 });
 
 beforeEach(async () => {
-  // Clear the database between tests
-  await firebase.clearFirestoreData({ projectId });
+	// Clear the database between tests
+	await firebase.clearFirestoreData({projectId});
 });
 
 after(async () => {
-  await Promise.all(firebase.apps().map(app => app.delete()));
-  console.log(`View rule coverage information at ${coverageUrl}\n`);
+	await Promise.all(firebase.apps().map(app => app.delete()));
+	console.log(`View rule coverage information at ${coverageUrl}\n`);
 });
 
 @suite
 class Levy {
-  @test
-  async "Create a legal user document"() {
-    const db = authedApp({uid: "itaylevy134"});
-    const profile = db.collection("users").doc("alice");
-    await firebase.assertFails(profile.set({ birthday: "January 1" }));
-  }
-}
+	@test
+	async "create a legal user document"() {
+		const username = "itaylevy134";
+		const phoneNumber = '+972544677';
+		const db = authedApp({uid: username, phone_number: phoneNumber});
+		const userProfile = db.collection("users").doc(username);
+		await firebase.assertSucceeds(userProfile.set(
+			{
+				phoneNumber: phoneNumber,
+				firstName: 'Itay',
+				lastName: 'Levy'
+			}
+		));
+	}
+} 
