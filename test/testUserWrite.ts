@@ -40,15 +40,15 @@ after(async () => {
 	await Promise.all(firebase.apps().map(app => app.delete()));
 	console.log(`View rule coverage information at ${coverageUrl}\n`);
 });
+const username = "itaylevy134";
+const phoneNumber = '+972544677';
+const db = authedApp({uid: username, phone_number: phoneNumber});
+const userProfile = db.collection("users").doc(username);
 
 @suite
-class Levy {
+class TestUserWrite {
 	@test
 	async "create legal user document"() {
-		const username = "itaylevy134";
-		const phoneNumber = '+972544677';
-		const db = authedApp({uid: username, phone_number: phoneNumber});
-		const userProfile = db.collection("users").doc(username);
 		await firebase.assertSucceeds(userProfile.set(
 			{
 				phoneNumber: phoneNumber,
@@ -60,10 +60,6 @@ class Levy {
 	
 	@test
 	async "create illegal user document (without first name)"() {
-		const username = "itaylevy134";
-		const phoneNumber = '+972544677';
-		const db = authedApp({uid: username, phone_number: phoneNumber});
-		const userProfile = db.collection("users").doc(username);
 		await firebase.assertFails(userProfile.set(
 			{
 				phoneNumber: phoneNumber,
@@ -74,10 +70,6 @@ class Levy {
 	
 	@test
 	async "create illegal user document (without last name)"() {
-		const username = "itaylevy134";
-		const phoneNumber = '+972544677';
-		const db = authedApp({uid: username, phone_number: phoneNumber});
-		const userProfile = db.collection("users").doc(username);
 		await firebase.assertFails(userProfile.set(
 			{
 				phoneNumber: phoneNumber,
@@ -88,10 +80,6 @@ class Levy {
 	
 	@test
 	async "create illegal user document (wrong phone number)"() {
-		const username = "itaylevy134";
-		const phoneNumber = '+972544677';
-		const db = authedApp({uid: username, phone_number: phoneNumber});
-		const userProfile = db.collection("users").doc(username);
 		await firebase.assertFails(userProfile.set(
 			{
 				phoneNumber: '12345',
