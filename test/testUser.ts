@@ -1,9 +1,10 @@
 /// <reference path='../node_modules/mocha-typescript/globals.d.ts' />
 import * as firebase from "@firebase/testing";
 import {
-	createLegalUserDocument, db,
+	authedApp,
+	createLegalUserDocument,
 	phoneNumber,
-	userProfile, usersCollection,
+	usersCollection,
 } from "./utils";
 
 
@@ -38,21 +39,10 @@ class TestUserSecurityRules {
 	@test
 	async "legal user document delete"() {
 		const createdDocument = await createLegalUserDocument();
-		// const query_snapshot = await db.collection('users')
-		// 	.where('phone_number', '==', phoneNumber).get();
 		await firebase.assertSucceeds(
 			createdDocument.delete()
 		);
 	}
-	
-	// @test
-	// async "illegal user document delete"() {
-	// 	const createdDocument = await createLegalUserDocument();
-	// 	db.app.auth().signOut();
-	// 	await firebase.assertFails(
-	// 		createdDocument.delete()
-	// 	);
-	// }
 	
 	@test
 	async "legal user document read"() {
@@ -62,12 +52,15 @@ class TestUserSecurityRules {
 		);
 	}
 	
-	// @test
-	// async "illegal user document read (not the document of the authenticated user)"() {
-	// 	await createLegalUserDocument();
-	//
-	// 	await firebase.assertFails(
-	// 		wrongAuthenticatedProfile.get()
-	// 	);
-	// }
+	@test
+	async "illegal user document read (not the document of the authenticated user)"() {
+		await createLegalUserDocument();
+		const unauthenticatedApp = authedApp({uid: 'wrongUid', phone_number: 'wrong phone number'});
+		await firebase.assertFails(
+			unauthenticatedApp
+				.collection('users')
+				.where('phone_number', '==', phoneNumber)
+				.get()
+		);
+	}
 }
