@@ -1,10 +1,9 @@
 /// <reference path='../node_modules/mocha-typescript/globals.d.ts' />
 import * as firebase from "@firebase/testing";
 import {
-	createLegalUserDocument,
+	createLegalUserDocument, db,
 	phoneNumber,
-	userProfile,
-	wrongAuthenticatedProfile
+	userProfile, usersCollection,
 } from "./utils";
 
 
@@ -12,82 +11,63 @@ import {
 class TestUserSecurityRules {
 	@test
 	async "create legal user document"() {
-		await firebase.assertSucceeds(userProfile.set(
-			{
-				phoneNumber: phoneNumber,
-				firstName: 'Itay',
-				lastName: 'Levy'
-			}
-		));
+		await firebase.assertSucceeds(
+			createLegalUserDocument()
+		);
 	}
 	
 	@test
-	async "create illegal user document (without first name)"() {
-		await firebase.assertFails(userProfile.set(
+	async "create illegal user document (without name)"() {
+		await firebase.assertFails(usersCollection.add(
 			{
-				phoneNumber: phoneNumber,
-				lastName: 'Levy'
-			}
-		));
-	}
-	
-	@test
-	async "create illegal user document (without last name)"() {
-		await firebase.assertFails(userProfile.set(
-			{
-				phoneNumber: phoneNumber,
-				firstName: 'Itay'
+				phoneNumber: phoneNumber
 			}
 		));
 	}
 	
 	@test
 	async "create illegal user document (wrong phone number)"() {
-		await firebase.assertFails(userProfile.set(
+		await firebase.assertFails(usersCollection.add(
 			{
 				phoneNumber: '12345',
-				firstName: 'Itay',
-				lastName: 'Levy'
+				name: 'Itay Levy',
 			}
 		));
 	}
 	
 	@test
 	async "legal user document delete"() {
-		await userProfile.set(
-			{
-				phoneNumber: phoneNumber,
-				firstName: 'Itay',
-				lastName: 'Levy'
-			}
-		);
+		const createdDocument = await createLegalUserDocument();
+		// const query_snapshot = await db.collection('users')
+		// 	.where('phone_number', '==', phoneNumber).get();
 		await firebase.assertSucceeds(
-			userProfile.delete()
-		)
+			createdDocument.delete()
+		);
 	}
 	
-	@test
-	async "illegal user document delete"() {
-		await createLegalUserDocument();
-		await firebase.assertFails(
-			wrongAuthenticatedProfile.delete()
-		);
-	}
+	// @test
+	// async "illegal user document delete"() {
+	// 	const createdDocument = await createLegalUserDocument();
+	// 	db.app.auth().signOut();
+	// 	await firebase.assertFails(
+	// 		createdDocument.delete()
+	// 	);
+	// }
 	
 	@test
 	async "legal user document read"() {
-		await createLegalUserDocument();
+		const createdDocument = await createLegalUserDocument();
 		await firebase.assertSucceeds(
-			userProfile.get()
+			createdDocument.get()
 		);
 	}
 	
-	@test
-	async "illegal user document read (not the document of the authenticated user)"() {
-		await createLegalUserDocument();
-		
-		await firebase.assertFails(
-			wrongAuthenticatedProfile.get()
-		);
-	}
+	// @test
+	// async "illegal user document read (not the document of the authenticated user)"() {
+	// 	await createLegalUserDocument();
+	//
+	// 	await firebase.assertFails(
+	// 		wrongAuthenticatedProfile.get()
+	// 	);
+	// }
 }
