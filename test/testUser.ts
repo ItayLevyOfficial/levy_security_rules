@@ -1,32 +1,15 @@
 /// <reference path='../node_modules/mocha-typescript/globals.d.ts' />
 import * as firebase from "@firebase/testing";
 import {
+	createLegalUserDocument,
 	phoneNumber,
 	userProfile,
-	projectId,
-	rules,
-	coverageUrl,
 	wrongAuthenticatedProfile
 } from "./utils";
 
-before(async () => {
-	await firebase.loadFirestoreRules({projectId, rules});
-});
-
-beforeEach(async () => {
-	// Clear the database between tests
-	await firebase.clearFirestoreData({projectId});
-});
-
-after(async () => {
-	await Promise.all(firebase.apps().map(app => app.delete()));
-	console.log(`View rule coverage information at ${coverageUrl}\n`);
-});
 
 @suite
 class TestUserSecurityRules {
-	
-	
 	@test
 	async "create legal user document"() {
 		await firebase.assertSucceeds(userProfile.set(
@@ -85,7 +68,7 @@ class TestUserSecurityRules {
 	
 	@test
 	async "illegal user document delete"() {
-		await this.createLegalUserDocument();
+		await createLegalUserDocument();
 		await firebase.assertFails(
 			wrongAuthenticatedProfile.delete()
 		);
@@ -93,7 +76,7 @@ class TestUserSecurityRules {
 	
 	@test
 	async "legal user document read"() {
-		await this.createLegalUserDocument();
+		await createLegalUserDocument();
 		await firebase.assertSucceeds(
 			userProfile.get()
 		);
@@ -101,20 +84,10 @@ class TestUserSecurityRules {
 	
 	@test
 	async "illegal user document read (not the document of the authenticated user)"() {
-		await this.createLegalUserDocument();
+		await createLegalUserDocument();
 		
 		await firebase.assertFails(
 			wrongAuthenticatedProfile.get()
-		);
-	}
-	
-	private async createLegalUserDocument() {
-		await userProfile.set(
-			{
-				phoneNumber: phoneNumber,
-				firstName: 'Itay',
-				lastName: 'Levy'
-			}
 		);
 	}
 }
