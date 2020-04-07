@@ -1,15 +1,18 @@
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
+
       function validName(name) {
         return name is string &&
           name.size() > 0 &&
           name.size() < 40;
       } 
+      
       allow create, update: if request.auth.uid == userId &&
        request.resource.data.phoneNumber == request.auth.token.phone_number &&
        validName(request.resource.data.firstName) &&
        validName(request.resource.data.lastName);
+
       allow delete: if request.auth.uid == userId;
       allow read: if request.auth.uid == userId;
     }

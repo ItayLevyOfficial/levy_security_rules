@@ -1,6 +1,13 @@
 /// <reference path='../node_modules/mocha-typescript/globals.d.ts' />
 import * as firebase from "@firebase/testing";
-import {phoneNumber, userProfile, projectId, rules, coverageUrl, authedApp, username} from "./utils";
+import {
+	phoneNumber,
+	userProfile,
+	projectId,
+	rules,
+	coverageUrl,
+	wrongAuthenticatedProfile
+} from "./utils";
 
 before(async () => {
 	await firebase.loadFirestoreRules({projectId, rules});
@@ -17,7 +24,9 @@ after(async () => {
 });
 
 @suite
-class TestUserWrite {
+class TestUserSecurityRules {
+	
+	
 	@test
 	async "create legal user document"() {
 		await firebase.assertSucceeds(userProfile.set(
@@ -76,6 +85,30 @@ class TestUserWrite {
 	
 	@test
 	async "illegal user document delete"() {
+		await this.createLegalUserDocument();
+		await firebase.assertFails(
+			wrongAuthenticatedProfile.delete()
+		);
+	}
+	
+	@test
+	async "legal user document read"() {
+		await this.createLegalUserDocument();
+		await firebase.assertSucceeds(
+			userProfile.get()
+		);
+	}
+	
+	@test
+	async "illegal user document read (not the document of the authenticated user)"() {
+		await this.createLegalUserDocument();
+		
+		await firebase.assertFails(
+			wrongAuthenticatedProfile.get()
+		);
+	}
+	
+	private async createLegalUserDocument() {
 		await userProfile.set(
 			{
 				phoneNumber: phoneNumber,
@@ -83,11 +116,5 @@ class TestUserWrite {
 				lastName: 'Levy'
 			}
 		);
-		const unauthenticatedProfile = authedApp({uid: 'barney'})
-			.collection("users")
-			.doc(username);
-		await firebase.assertFails(
-			unauthenticatedProfile.delete()
-		)
 	}
-} 
+}
