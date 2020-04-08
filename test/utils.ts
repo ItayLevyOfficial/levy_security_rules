@@ -1,14 +1,15 @@
 import * as fs from "fs";
 import * as firebase from "@firebase/testing";
 
-
 export const projectId = "levy";
 export const coverageUrl = `http=//localhost=8080/emulator/v1/projects/${projectId}=ruleCoverage.html`;
 export const rules = fs.readFileSync("firestore.rules", "utf8");
 export const phoneNumber = '+972544677';
-export const authenticatedDb = authedApp({uid: 'itaylevy134', phone_number: phoneNumber});
-export const usersCollection = authenticatedDb.collection("users");
+export const usersCollection = authedApp({uid: 'itaylevy134', phone_number: phoneNumber})
+	.collection("users");
 export const userDocument = usersCollection.doc(phoneNumber);
+export const unauthenticatedApp = authedApp({uid: 'wrongUid', phone_number: 'wrong phone number'});
+
 /**
  * Creates a new app with authentication data matching the input.
  *

@@ -1,5 +1,9 @@
 import * as firebase from "@firebase/testing";
-import {authedApp, createLegalUserDocument, phoneNumber, userDocument, usersCollection,} from "../utils";
+import {
+	createLegalUserDocument,
+	phoneNumber, unauthenticatedApp,
+	userDocument, usersCollection,
+} from "../utils";
 
 describe('Test user security rules',
 	() => {
@@ -14,11 +18,14 @@ describe('Test user security rules',
 			));
 		});
 		it('should fail to create illegal user document with wrong phone number', async function () {
-			await firebase.assertFails(usersCollection.doc('wrong phone number').set(
-				{
-					name: 'Itay Levy',
-				}
-			));
+			await firebase.assertFails(
+				usersCollection
+					.doc('wrong phone number')
+					.set(
+						{
+							name: 'Itay Levy',
+						}
+					));
 		});
 		it('should successfully delete user document', async function () {
 			await createLegalUserDocument();
@@ -34,7 +41,6 @@ describe('Test user security rules',
 		});
 		it('should fail to read user document when user not authenticated', async function () {
 			await createLegalUserDocument();
-			const unauthenticatedApp = authedApp({uid: 'wrongUid', phone_number: 'wrong phone number'});
 			await firebase.assertFails(
 				unauthenticatedApp
 					.collection('users')
@@ -44,7 +50,6 @@ describe('Test user security rules',
 		});
 		it('should fail to update other user document name', async function () {
 			await createLegalUserDocument();
-			const unauthenticatedApp = authedApp({uid: 'barney', phone_number: 'wrong phone number'});
 			await firebase.assertFails(
 				unauthenticatedApp.collection('users')
 					.doc(phoneNumber)
