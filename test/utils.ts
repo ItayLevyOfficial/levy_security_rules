@@ -8,7 +8,7 @@ export const rules = fs.readFileSync("firestore.rules", "utf8");
 export const phoneNumber = '+972544677';
 export const authenticatedDb = authedApp({uid: 'itaylevy134', phone_number: phoneNumber});
 export const usersCollection = authenticatedDb.collection("users");
-
+export const userDocument = usersCollection.doc(phoneNumber);
 /**
  * Creates a new app with authentication data matching the input.
  *
@@ -20,9 +20,8 @@ export function authedApp(auth) {
 }
 
 export async function createLegalUserDocument() {
-	return await usersCollection.add(
+	await userDocument.set(
 		{
-			phone_number: phoneNumber,
 			name: 'Itay Levy'
 		}
 	);

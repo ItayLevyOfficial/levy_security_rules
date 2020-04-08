@@ -1,10 +1,6 @@
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{user_document_id} {
-
-      function same_phone_number(request, user_document) {
-        return user_document.data.phone_number == request.auth.token.phone_number;
-      }
+    match /users/{phone_number} {
 
       function validName(name) {
         return name is string &&
@@ -12,23 +8,20 @@ service cloud.firestore {
           name.size() < 50;
       }
 
+      function verified_phone_number() {
+        return phone_number == request.auth.token.phone_number;
+      }
+
       match /sent_messages/{message_id} {
-        allow write: if same_phone_number(
-          request,
-          get(/databases/$(database)/documents/users/$(user_document_id))
-        ); 
+        allow write: if verified_phone_number();
       }
 
-      function allow_user_create() {
-        return same_phone_number(request, request.resource) &&
+      allow write: if 
+        verified_phone_number() &&
         validName(request.resource.data.name);
-      }
-      allow create: if allow_user_create();
 
-      allow update: if same_phone_number(request, resource.data) && allow_user_create();
-
-      allow delete: if same_phone_number(request, resource);
-      allow read: if request.auth.token.phone_number == resource.data.phone_number;
+      allow delete: if verified_phone_number();
+      allow read: if verified_phone_number();
     }
   }
 }
