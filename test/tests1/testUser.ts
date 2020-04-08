@@ -50,5 +50,16 @@ describe('Test user security rules',
 					.get()
 			);
 		});
+		it('should fail to update other user document phone_number to ' +
+			'authenticated phone_number', async function () {
+			const createdDocument = await createLegalUserDocument();
+			const wrongPhoneNumber = 'wrong phone number';
+			const unauthenticatedApp = authedApp({uid: 'barney', phone_number: wrongPhoneNumber});
+			await firebase.assertFails(
+				unauthenticatedApp.collection('users')
+					.doc(createdDocument.id)
+					.set({phone_number: wrongPhoneNumber}, {merge: true})
+			)
+		});
 	}
 );
