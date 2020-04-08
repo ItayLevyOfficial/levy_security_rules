@@ -2,26 +2,31 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{phone_number} {
 
-      function validName(name) {
+      function valid_name(name) {
         return name is string &&
           name.size() > 0 &&
-          name.size() < 50;
+          name.size() < 100;
       }
 
       function verified_phone_number() {
         return phone_number == request.auth.token.phone_number;
       }
 
+      function valid_message_text(text) {
+        return text is string && text.size() > 0 && text.size() < 500;
+      }
+
       match /sent_messages/{message_id} {
-        allow write: if verified_phone_number();
+        allow create: if verified_phone_number() &&
+          valid_message_text(request.resource.data.text) &&
+          request.resource.data.created_at == request.time;
       }
 
       allow write: if 
         verified_phone_number() &&
-        validName(request.resource.data.name);
+        valid_name(request.resource.data.name);
 
-      allow delete: if verified_phone_number();
-      allow read: if verified_phone_number();
+      allow delete, read: if verified_phone_number();
     }
   }
 }

@@ -9,6 +9,7 @@ export const usersCollection = authedApp({uid: 'itaylevy134', phone_number: phon
 	.collection("users");
 export const userDocument = usersCollection.doc(phoneNumber);
 export const unauthenticatedApp = authedApp({uid: 'wrongUid', phone_number: 'wrong phone number'});
+export const sentMessages = userDocument.collection('sent_messages');
 
 /**
  * Creates a new app with authentication data matching the input.
