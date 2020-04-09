@@ -4,13 +4,17 @@ import * as firebase from "@firebase/testing";
 export const projectId = "levy";
 export const coverageUrl = `http=//localhost=8080/emulator/v1/projects/${projectId}=ruleCoverage.html`;
 export const rules = fs.readFileSync("firestore.rules", "utf8");
-export const phoneNumber = '+972544677';
+export const phoneNumber = '+972544677134';
 export const usersCollection = authedApp({uid: 'itaylevy134', phone_number: phoneNumber})
 	.collection("users");
 export const userDocument = usersCollection.doc(phoneNumber);
-export const unauthenticatedApp = authedApp({uid: 'wrongUid', phone_number: 'wrong phone number'});
+export const wrongAuthenticatedApp = authedApp({uid: 'wrongUid', phone_number: '+1234567890'});
 export const sentMessages = userDocument.collection('sent_messages');
 export const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+export const wrongAuthenticatedSentMessages = wrongAuthenticatedApp
+	.collection('users')
+	.doc(phoneNumber)
+	.collection('sent_messages');
 
 export function authedApp(auth) {
 	return firebase.initializeTestApp({projectId, auth}).firestore();

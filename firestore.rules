@@ -29,7 +29,7 @@ service cloud.firestore {
         
         allow delete: if verified_phone_number();
 
-        allow read: if verified_phone_number; 
+        allow read: if verified_phone_number(); 
       }
 
       allow write: if 

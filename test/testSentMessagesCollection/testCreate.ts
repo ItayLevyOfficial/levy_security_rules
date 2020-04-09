@@ -1,11 +1,21 @@
 import * as firebase from "@firebase/testing";
-import {createLegalSentMessage, createLegalUserDocument, sentMessages, serverTimestamp} from "../utils";
+import {createLegalUserDocument, sentMessages, serverTimestamp, wrongAuthenticatedSentMessages} from "../utils";
 
-describe('Test the sent messages collection security rules', () => {
+describe('Test the sent messages collection security rules for creates', () => {
 		beforeEach(createLegalUserDocument);
 		it('should successfully create a sent message', async function () {
 			await firebase.assertSucceeds(
 				sentMessages.add(
+					{
+						text: 'Test text',
+						created_at: serverTimestamp
+					}
+				)
+			);
+		});
+		it('should fail to create sent message with wrong credentials', async function () {
+			await firebase.assertFails(
+				wrongAuthenticatedSentMessages.add(
 					{
 						text: 'Test text',
 						created_at: serverTimestamp
@@ -48,17 +58,6 @@ describe('Test the sent messages collection security rules', () => {
 					{
 						text: 'a'.repeat(501),
 						created_at: serverTimestamp
-					}
-				)
-			);
-		});
-		it('should successfully update a sent message', async function () {
-			const sentMessage = await createLegalSentMessage();
-			await firebase.assertSucceeds(
-				sentMessage.update(
-					{
-						text: 'Test text 2',
-						last_modified_at: serverTimestamp
 					}
 				)
 			);
