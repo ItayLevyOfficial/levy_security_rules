@@ -1,5 +1,5 @@
 import * as firebase from "@firebase/testing";
-import {createLegalUserDocument, sentMessages, userDocument} from "../utils";
+import {createLegalSentMessage, createLegalUserDocument, sentMessages, serverTimestamp} from "../utils";
 
 describe('Test the sent messages collection security rules', () => {
 		beforeEach(createLegalUserDocument);
@@ -8,7 +8,7 @@ describe('Test the sent messages collection security rules', () => {
 				sentMessages.add(
 					{
 						text: 'Test text',
-						created_at: firebase.firestore.FieldValue.serverTimestamp()
+						created_at: serverTimestamp
 					}
 				)
 			);
@@ -17,7 +17,7 @@ describe('Test the sent messages collection security rules', () => {
 			await firebase.assertFails(
 				sentMessages.add(
 					{
-						created_at: firebase.database.ServerValue.TIMESTAMP
+						created_at: serverTimestamp
 					}
 				)
 			);
@@ -36,7 +36,7 @@ describe('Test the sent messages collection security rules', () => {
 				sentMessages.add(
 					{
 						text: 'Test text',
-						// This date is wrong because it's the client date, not the server one.
+						// This date is wrong because it's the client date, not the server ones.
 						created_at: +new Date()
 					}
 				)
@@ -47,7 +47,18 @@ describe('Test the sent messages collection security rules', () => {
 				sentMessages.add(
 					{
 						text: 'a'.repeat(501),
-						created_at: firebase.database.ServerValue.TIMESTAMP
+						created_at: serverTimestamp
+					}
+				)
+			);
+		});
+		it('should successfully update a sent message', async function () {
+			const sentMessage = await createLegalSentMessage();
+			await firebase.assertSucceeds(
+				sentMessage.update(
+					{
+						text: 'Test text 2',
+						last_modified_at: serverTimestamp
 					}
 				)
 			);

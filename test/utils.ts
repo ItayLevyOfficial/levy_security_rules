@@ -10,13 +10,8 @@ export const usersCollection = authedApp({uid: 'itaylevy134', phone_number: phon
 export const userDocument = usersCollection.doc(phoneNumber);
 export const unauthenticatedApp = authedApp({uid: 'wrongUid', phone_number: 'wrong phone number'});
 export const sentMessages = userDocument.collection('sent_messages');
+export const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp();
 
-/**
- * Creates a new app with authentication data matching the input.
- *
- * @param {object} auth the object to use for authentication (typically {uid: some-uid})
- * @return {object} the app.
- */
 export function authedApp(auth) {
 	return firebase.initializeTestApp({projectId, auth}).firestore();
 }
@@ -25,6 +20,15 @@ export async function createLegalUserDocument() {
 	await userDocument.set(
 		{
 			name: 'Itay Levy'
+		}
+	);
+}
+
+export async function createLegalSentMessage() {
+	return await sentMessages.add(
+		{
+			text: 'Test text',
+			created_at: firebase.firestore.FieldValue.serverTimestamp()
 		}
 	);
 }
@@ -41,3 +45,4 @@ after(async () => {
 	await Promise.all(firebase.apps().map(app => app.delete()));
 	console.log(`View rule coverage information at ${coverageUrl}\n`);
 });
+
