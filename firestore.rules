@@ -17,9 +17,19 @@ service cloud.firestore {
       }
 
       match /sent_messages/{message_id} {
+
         allow create: if verified_phone_number() &&
           valid_message_text(request.resource.data.text) &&
           request.resource.data.created_at == request.time;
+        
+        allow update: if verified_phone_number() && 
+          valid_message_text(request.resource.data.text) &&
+          request.resource.data.created_at == resource.data.created_at &&
+          request.resource.data.last_modified_at == request.time;
+        
+        allow delete: if verified_phone_number();
+
+        allow read: if verified_phone_number; 
       }
 
       allow write: if 
